@@ -4,12 +4,11 @@ import org.apache.commons.csv.CSVFormat;
 import org.apache.commons.csv.CSVParser;
 import org.apache.commons.csv.CSVRecord;
 
+import javax.print.DocFlavor;
 import java.io.FileReader;
 import java.io.IOException;
 import java.io.Reader;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
+import java.util.*;
 
 /**
  * Created by LaunchCode
@@ -42,7 +41,7 @@ public class JobData {
                 values.add(aValue);
             }
         }
-
+        Collections.sort(values);
         return values;
     }
 
@@ -50,8 +49,8 @@ public class JobData {
 
         // load data, if not already loaded
         loadData();
-
-        return allJobs;
+        ArrayList<HashMap<String, String>> jobs = new ArrayList<>(allJobs);
+        return jobs;
     }
 
     /**
@@ -71,18 +70,52 @@ public class JobData {
         loadData();
 
         ArrayList<HashMap<String, String>> jobs = new ArrayList<>();
+        int jobCount = 0;
 
         for (HashMap<String, String> row : allJobs) {
 
-            String aValue = row.get(column);
+            String aValue = row.get(column).toLowerCase();
 
-            if (aValue.contains(value)) {
+            if (aValue.contains(value.toLowerCase())) {
                 jobs.add(row);
+                jobCount++;
             }
         }
+        System.out.println("Your search returned " + jobCount + " job(s)");
 
         return jobs;
     }
+
+    /**
+     * Returns results of search the jobs data by key/value, using
+     * inclusion of the search term. Searches ALL columns.
+     *
+     *
+     * @param value Value of teh field to search for
+     * @return List of all jobs matching the criteria
+     */
+    public static ArrayList<HashMap<String, String>> findByValue(String value) {
+        // load data, if not already loaded
+        loadData();
+
+        ArrayList<HashMap<String, String>> jobs = new ArrayList<>();
+        int jobCount = 0;
+
+        for (HashMap<String, String> row : allJobs) {
+            for (Map.Entry<String, String> column : row.entrySet()) {
+                String aValue = column.getValue().toLowerCase();
+
+                if(aValue.contains(value.toLowerCase())) {
+                    jobs.add(row);
+                    jobCount++;
+                    break;
+                }
+            }
+        }
+        System.out.println("Your search returned " + jobCount + " job(s)");
+        return jobs;
+    }
+
 
     /**
      * Read in data from a CSV file and store it in a list
